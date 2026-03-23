@@ -3,11 +3,13 @@ package com.alibaba.cloud.ai.agentdatamanager.controller;
 import com.alibaba.cloud.ai.agentdatamanager.exception.BusinessException;
 import com.alibaba.cloud.ai.agentdatamanager.vo.ApiResponse;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -15,6 +17,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ApiResponse<String> handleBusiness(BusinessException ex) {
         return ApiResponse.error(ex.getMessage());
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiResponse<String>> handleStatus(ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(ApiResponse.error(ex.getReason()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

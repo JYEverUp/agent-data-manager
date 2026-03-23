@@ -1,3 +1,25 @@
+CREATE TABLE IF NOT EXISTS agent (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL COMMENT '智能体名称',
+    description TEXT COMMENT '智能体描述',
+    avatar TEXT COMMENT '头像URL',
+    status VARCHAR(50) DEFAULT 'draft' COMMENT '状态：draft-待发布，published-已发布，offline-已下线',
+    api_key VARCHAR(255) DEFAULT NULL COMMENT '访问 API Key，格式 sk-xxx',
+    api_key_enabled TINYINT DEFAULT 0 COMMENT 'API Key 是否启用：0-禁用，1-启用',
+    prompt TEXT COMMENT '自定义Prompt配置',
+    category VARCHAR(100) COMMENT '分类',
+    admin_id BIGINT COMMENT '管理员ID',
+    tags TEXT COMMENT '标签，逗号分隔',
+    human_review_enabled TINYINT DEFAULT 0 COMMENT '是否开启人工审核：0-关闭，1-开启',
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (id),
+    INDEX idx_agent_name (name),
+    INDEX idx_agent_status (status),
+    INDEX idx_agent_category (category),
+    INDEX idx_agent_admin_id (admin_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `model_config` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `provider` varchar(255) NOT NULL COMMENT '厂商标识',
