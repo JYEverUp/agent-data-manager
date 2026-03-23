@@ -1,6 +1,6 @@
 # agent-data-manager backend
 
-这是在 `agentData/agent-data-manager` 下新建的后端项目骨架，依赖和技术栈参考了仓库里的 `data-agent-management`。
+这是在 `agentData/agent-data-manager` 下搭建的后端项目，当前已经补齐 `/model-config` 页面联调所需的接口、数据表和 MyBatis 持久层。
 
 ## 当前技术栈
 
@@ -45,13 +45,22 @@ mvn spring-boot:run
 GET /api/health
 ```
 
-## 后续如果要继续“抄” data-agent-management
+## 已完成
 
-建议下一步按需搬这些内容：
+- `/api/model-config/list`
+- `/api/model-config/add`
+- `/api/model-config/update`
+- `/api/model-config/{id}`
+- `/api/model-config/activate/{id}`
+- `/api/model-config/test`
+- `/api/model-config/check-ready`
+- `model_config` 建表脚本
+- MyBatis `entity` / `mapper` / `converter`
 
-1. `config`
-2. `aop`
-3. `connector`
-4. `service`
-5. `mapper`
-6. `application.yml` 中的 AI、数据库、向量库配置
+## 数据初始化
+
+应用启动时会自动执行：
+
+```text
+classpath:sql/schema.sql
+```
