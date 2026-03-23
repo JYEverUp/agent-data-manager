@@ -1,6 +1,7 @@
 package com.alibaba.cloud.ai.agentdatamanager.controller;
 
 import com.alibaba.cloud.ai.agentdatamanager.dto.ModelConfigDTO;
+import com.alibaba.cloud.ai.agentdatamanager.service.ModelConfigOpsService;
 import com.alibaba.cloud.ai.agentdatamanager.service.ModelConfigService;
 import com.alibaba.cloud.ai.agentdatamanager.vo.ApiResponse;
 import com.alibaba.cloud.ai.agentdatamanager.vo.ModelCheckVo;
@@ -24,6 +25,8 @@ public class ModelConfigController {
 
     private final ModelConfigService modelConfigService;
 
+    private final ModelConfigOpsService modelConfigOpsService;
+
     @GetMapping("/list")
     public ApiResponse<List<ModelConfigDTO>> list() {
         return ApiResponse.success("获取模型配置列表成功", modelConfigService.list());
@@ -37,7 +40,7 @@ public class ModelConfigController {
 
     @PutMapping("/update")
     public ApiResponse<String> update(@Valid @RequestBody ModelConfigDTO config) {
-        modelConfigService.update(config);
+        modelConfigOpsService.updateAndRefresh(config);
         return ApiResponse.success("配置已更新");
     }
 
@@ -49,13 +52,13 @@ public class ModelConfigController {
 
     @PostMapping("/activate/{id}")
     public ApiResponse<String> activate(@PathVariable Integer id) {
-        modelConfigService.activate(id);
+        modelConfigOpsService.activateConfig(id);
         return ApiResponse.success("模型切换成功！");
     }
 
     @PostMapping("/test")
     public ApiResponse<String> test(@Valid @RequestBody ModelConfigDTO config) {
-        modelConfigService.testConnection(config);
+        modelConfigOpsService.testConnection(config);
         return ApiResponse.success("连接测试成功！模型可用。");
     }
 

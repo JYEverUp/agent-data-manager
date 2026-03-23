@@ -73,17 +73,6 @@ public class ModelConfigService {
         modelConfigMapper.updateById(target);
     }
 
-    public void testConnection(ModelConfigDTO config) {
-        validateBusinessRules(config, config.getId() != null);
-        validateUrl(config.getBaseUrl());
-        if (config.getModelType() == ModelType.CHAT && StringUtils.isNotBlank(config.getCompletionsPath())) {
-            validatePath(config.getCompletionsPath(), "completionsPath");
-        }
-        if (config.getModelType() == ModelType.EMBEDDING && StringUtils.isNotBlank(config.getEmbeddingsPath())) {
-            validatePath(config.getEmbeddingsPath(), "embeddingsPath");
-        }
-    }
-
     public ModelCheckVo checkReady() {
         boolean chatReady = getActiveConfigByType(ModelType.CHAT) != null;
         boolean embeddingReady = getActiveConfigByType(ModelType.EMBEDDING) != null;
@@ -96,6 +85,10 @@ public class ModelConfigService {
 
     public ModelConfigDTO getActiveConfigByType(ModelType modelType) {
         return ModelConfigConverter.toDTO(modelConfigMapper.selectActiveByType(modelType.name()));
+    }
+
+    public ModelConfig findById(Integer id) {
+        return modelConfigMapper.findById(id);
     }
 
     private void validateBusinessRules(ModelConfigDTO config, boolean updating) {
