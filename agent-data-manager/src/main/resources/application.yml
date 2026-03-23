@@ -24,3 +24,11 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+logging:
+  level:
+    root: INFO
+    com.alibaba.cloud.ai.agentdatamanager: DEBUG
+    org.mybatis: DEBUG
+    org.springframework.jdbc.core: DEBUG
+
