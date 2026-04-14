@@ -1,3 +1,4 @@
+
 package com.alibaba.cloud.ai.agentdatamanager.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -8,42 +9,44 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Data
+/**
+ * Agent Entity Class
+ */
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class Agent {
 
-    private Long id;
+	private Long id;
 
-    private String name;
+	private String name; // Agent name
 
-    private String description;
+	private String description; // Agent description
 
-    private String avatar;
+	private String avatar; // Avatar URL
 
-    private String status;
+	// todo: 改为枚举
+	private String status; // Status: draft-pending publication, published-published,
+							// offline-offline
 
-    private String apiKey;
+	private String apiKey; // API Key for external access, format sk-xxx
 
-    @Builder.Default
-    private Integer apiKeyEnabled = 0;
+	@Builder.Default
+	private Integer apiKeyEnabled = 0; // 0/1 toggle for API access
 
-    private String prompt;
+	private String prompt; // Custom Prompt configuration
 
-    private String category;
+	private String category; // Category
 
-    private Long adminId;
+	private Long adminId; // Admin ID
 
-    private String tags;
+	private String tags; // Tags, comma separated
 
-    @Builder.Default
-    private Integer humanReviewEnabled = 0;
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	private LocalDateTime createTime;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime createTime;
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime updateTime;
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	private LocalDateTime updateTime;
 
 }
