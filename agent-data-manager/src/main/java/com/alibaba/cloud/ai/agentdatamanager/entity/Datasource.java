@@ -1,3 +1,4 @@
+
 package com.alibaba.cloud.ai.agentdatamanager.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -15,38 +16,46 @@ import java.time.LocalDateTime;
 @Builder
 public class Datasource {
 
-    private Integer id;
+	private Integer id;
 
-    private String name;
+	private String name;
 
-    private String type;
+	private String type;
 
-    private String host;
+	private String host;
 
-    private Integer port;
+	private Integer port;
 
-    private String databaseName;
+	private String databaseName;
 
-    private String username;
+	private String username;
 
-    private String password;
+	private String password;
 
-    private String connectionUrl;
+	private String connectionUrl;
 
-    private String status;
+	private String status;
 
-    private String testStatus;
+	private String testStatus;
 
-    private String description;
+	private String description;
 
-    private Long creatorId;
+	private Long creatorId;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createTime;
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime createTime;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updateTime;
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime updateTime;
+
+	@Override
+	public String toString() {
+		return "Datasource{" + "id=" + id + ", name='" + name + '\'' + ", type='" + type + '\'' + ", host='" + host
+				+ '\'' + ", port=" + port + ", databaseName='" + databaseName + '\'' + ", status='" + status + '\''
+				+ ", testStatus='" + testStatus + '\'' + ", createTime=" + createTime + ", updateTime=" + updateTime
+				+ '}';
+	}
 
 }
