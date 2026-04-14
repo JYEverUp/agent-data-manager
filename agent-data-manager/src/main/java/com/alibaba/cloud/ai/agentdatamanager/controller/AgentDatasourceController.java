@@ -1,80 +1,165 @@
+
 package com.alibaba.cloud.ai.agentdatamanager.controller;
 
-import com.alibaba.cloud.ai.agentdatamanager.dto.ToggleDatasourceDTO;
-import com.alibaba.cloud.ai.agentdatamanager.dto.UpdateDatasourceTablesDTO;
+import com.alibaba.cloud.ai.agentdatamanager.dto.datasource.ToggleDatasourceDTO;
+import com.alibaba.cloud.ai.agentdatamanager.dto.datasource.UpdateDatasourceTablesDTO;
 import com.alibaba.cloud.ai.agentdatamanager.entity.AgentDatasource;
-import com.alibaba.cloud.ai.agentdatamanager.service.AgentDatasourceService;
+import com.alibaba.cloud.ai.agentdatamanager.exception.InternalServerException;
+import com.alibaba.cloud.ai.agentdatamanager.exception.InvalidInputException;
+import com.alibaba.cloud.ai.agentdatamanager.service.datasource.AgentDatasourceService;
 import com.alibaba.cloud.ai.agentdatamanager.vo.ApiResponse;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Agent Schema Initialization Controller Handles agent's database Schema initialization
+ * to vector storage
+ */
 @Slf4j
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/agent/{agentId}/datasources")
+@CrossOrigin(origins = "*")
+@AllArgsConstructor
 public class AgentDatasourceController {
 
-    private final AgentDatasourceService agentDatasourceService;
+	private final AgentDatasourceService agentDatasourceService;
 
-    @PostMapping("/init")
-    public ApiResponse<?> initSchema(@PathVariable Long agentId) {
-        AgentDatasource agentDatasource = agentDatasourceService.getCurrentAgentDatasource(agentId);
-        Integer datasourceId = agentDatasource.getDatasourceId();
-        List<String> tables = Optional.ofNullable(agentDatasource.getSelectTables()).orElse(List.of());
-        Boolean result = agentDatasourceService.initializeSchemaForAgentWithDatasource(agentId, datasourceId, tables);
-        return result ? ApiResponse.success("Schema初始化成功") : ApiResponse.error("Schema初始化失败");
-    }
+	/**
+	 * Initialize agent's database Schema to vector storage Corresponds to the "Initialize
+	 * Information Source" function on the frontend
+	 */
+	@PostMapping("/init")
+	public ApiResponse<?> initSchema(@PathVariable Long agentId) {
+		// 防止前端恶意请求，dto数据应该在后端获取
+		try {
+			AgentDatasource agentDatasource = agentDatasourceService.getCurrentAgentDatasource(agentId);
+			log.info("Initializing schema for agent: {}", agentId);
 
-    @GetMapping
-    public ApiResponse<List<AgentDatasource>> getAgentDatasource(@PathVariable Long agentId) {
-        List<AgentDatasource> datasources = agentDatasourceService.getAgentDatasource(agentId);
-        return ApiResponse.success("操作成功", datasources);
-    }
+			// Extract data source ID and table list from request
+			Integer datasourceId = agentDatasource.getDatasourceId();
+			List<String> tables = Optional.ofNullable(agentDatasource.getSelectTables()).orElse(List.of());
 
-    @GetMapping("/active")
-    public ApiResponse<AgentDatasource> getActiveAgentDatasource(@PathVariable Long agentId) {
-        AgentDatasource datasource = agentDatasourceService.getCurrentAgentDatasource(agentId);
-        return ApiResponse.success("操作成功", datasource);
-    }
+			// Validate request parameters
+			if (datasourceId == null) {
+				throw new InvalidInputException("数据源ID不能为空");
+			}
 
-    @PostMapping("/{datasourceId}")
-    public ApiResponse<AgentDatasource> addDatasourceToAgent(@PathVariable Long agentId,
-            @PathVariable Integer datasourceId) {
-        AgentDatasource agentDatasource = agentDatasourceService.addDatasourceToAgent(agentId, datasourceId);
-        return ApiResponse.success("数据源添加成功", agentDatasource);
-    }
+			if (tables.isEmpty()) {
+				throw new InvalidInputException("表列表不能为空");
+			}
 
-    @PostMapping("/tables")
-    public ApiResponse<?> updateDatasourceTables(@PathVariable Long agentId,
-            @RequestBody UpdateDatasourceTablesDTO dto) {
-        dto.setTables(Optional.ofNullable(dto.getTables()).orElse(List.of()));
-        agentDatasourceService.updateDatasourceTables(agentId, dto.getDatasourceId(), dto.getTables());
-        return ApiResponse.success("更新成功");
-    }
+			// Execute Schema initialization
+			Boolean result = agentDatasourceService.initializeSchemaForAgentWithDatasource(agentId, datasourceId,
+					tables);
 
-    @DeleteMapping("/{datasourceId}")
-    public ApiResponse<?> removeDatasourceFromAgent(@PathVariable Long agentId, @PathVariable Integer datasourceId) {
-        agentDatasourceService.removeDatasourceFromAgent(agentId, datasourceId);
-        return ApiResponse.success("数据源已移除");
-    }
+			if (result) {
+				log.info("Successfully initialized schema for agent: {}, tables: {}", agentId, tables.size());
+				return ApiResponse.success("Schema初始化成功");
+			}
+			else {
+				throw new InternalServerException("Schema初始化失败");
+			}
+		}
+		catch (Exception e) {
+			log.error("Failed to initialize schema for agent: {}", agentId, e);
+			throw new InternalServerException("Schema初始化失败：%s".formatted(e.getMessage()));
+		}
+	}
 
-    @PutMapping("/toggle")
-    public ApiResponse<AgentDatasource> toggleDatasourceForAgent(@PathVariable Long agentId,
-            @RequestBody ToggleDatasourceDTO dto) {
-        AgentDatasource agentDatasource = agentDatasourceService.toggleDatasourceForAgent(agentId,
-                dto.getDatasourceId(), dto.getIsActive());
-        return ApiResponse.success(Boolean.TRUE.equals(dto.getIsActive()) ? "数据源已启用" : "数据源已禁用", agentDatasource);
-    }
+	/** Get list of data sources configured for agent */
+	@GetMapping
+	public ApiResponse<List<AgentDatasource>> getAgentDatasource(@PathVariable Long agentId) {
+		try {
+			log.info("Getting datasources for agent: {}", agentId);
+			List<AgentDatasource> datasources = agentDatasourceService.getAgentDatasource(agentId);
+			log.info("Successfully retrieved {} datasources for agent: {}", datasources.size(), agentId);
+			return ApiResponse.success("操作成功", datasources);
+		}
+		catch (Exception e) {
+			log.error("Failed to get datasources for agent: {}", agentId, e);
+			throw new InvalidInputException("获取数据源失败：%s".formatted(e.getMessage()), List.of());
+		}
+	}
+
+	@GetMapping("/active")
+	public ApiResponse<AgentDatasource> getActiveAgentDatasource(@PathVariable Long agentId) {
+		try {
+			log.info("Getting active datasource for agent: {}", agentId);
+			AgentDatasource datasource = agentDatasourceService.getCurrentAgentDatasource(agentId);
+			return ApiResponse.success("操作成功", datasource);
+		}
+		catch (Exception e) {
+			log.error("Failed to get active datasource for agent: {}", agentId, e);
+			throw new InvalidInputException("获取数据源失败：%s".formatted(e.getMessage()), List.of());
+		}
+	}
+
+	/** Add data source for agent */
+	@PostMapping("/{datasourceId}")
+	public ApiResponse<AgentDatasource> addDatasourceToAgent(@PathVariable Long agentId,
+			@PathVariable Integer datasourceId) {
+		try {
+			if (datasourceId == null) {
+				throw new InvalidInputException("数据源ID不能为空");
+			}
+
+			AgentDatasource agentDatasource = agentDatasourceService.addDatasourceToAgent(agentId, datasourceId);
+			return ApiResponse.success("数据源添加成功", agentDatasource);
+		}
+		catch (Exception e) {
+			throw new InternalServerException("数据源添加失败：%s".formatted(e.getMessage()));
+		}
+	}
+
+	// 更新选择的数据表
+	@PostMapping("/tables")
+	public ApiResponse<?> updateDatasourceTables(@PathVariable Long agentId,
+			@RequestBody @Validated UpdateDatasourceTablesDTO dto) {
+		try {
+			dto.setTables(Optional.ofNullable(dto.getTables()).orElse(List.of()));
+			agentDatasourceService.updateDatasourceTables(agentId, dto.getDatasourceId(), dto.getTables());
+			return ApiResponse.success("更新成功");
+		}
+		catch (Exception e) {
+			log.error("Error: ", e);
+			throw new InternalServerException("更新失败：%s".formatted(e.getMessage()));
+		}
+	}
+
+	/** Remove data source association from agent */
+	@DeleteMapping("/{datasourceId}")
+	public ApiResponse<?> removeDatasourceFromAgent(@PathVariable Long agentId, @PathVariable Integer datasourceId) {
+		try {
+			agentDatasourceService.removeDatasourceFromAgent(agentId, datasourceId);
+			return ApiResponse.success("数据源已移除");
+		}
+		catch (Exception e) {
+			throw new InternalServerException("移除失败：%s".formatted(e.getMessage()));
+		}
+	}
+
+	/** 启用/禁用智能体的数据源 */
+	@PutMapping("/toggle")
+	public ApiResponse<AgentDatasource> toggleDatasourceForAgent(@PathVariable Long agentId,
+			@RequestBody ToggleDatasourceDTO dto) {
+		try {
+			Boolean isActive = dto.getIsActive();
+			Integer datasourceId = dto.getDatasourceId();
+			if (isActive == null || datasourceId == null) {
+				throw new InvalidInputException("激活状态不能为空");
+			}
+			AgentDatasource agentDatasource = agentDatasourceService.toggleDatasourceForAgent(agentId,
+					dto.getDatasourceId(), isActive);
+			return ApiResponse.success(isActive ? "数据源已启用" : "数据源已禁用", agentDatasource);
+		}
+		catch (Exception e) {
+			throw new InternalServerException("操作失败：%s".formatted(e.getMessage()));
+		}
+	}
 
 }
