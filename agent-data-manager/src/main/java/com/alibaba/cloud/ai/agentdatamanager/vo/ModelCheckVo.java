@@ -1,3 +1,4 @@
+
 package com.alibaba.cloud.ai.agentdatamanager.vo;
 
 import lombok.AllArgsConstructor;
@@ -7,14 +8,14 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class ModelCheckVo {
 
-    private boolean chatModelReady;
+	boolean chatModelReady;
 
-    private boolean embeddingModelReady;
+	boolean embeddingModelReady;
 
-    private boolean ready;
+	boolean ready;
 
 }

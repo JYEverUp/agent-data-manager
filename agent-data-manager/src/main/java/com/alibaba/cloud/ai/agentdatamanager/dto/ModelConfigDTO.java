@@ -1,12 +1,9 @@
+
 package com.alibaba.cloud.ai.agentdatamanager.dto;
 
+import com.alibaba.cloud.ai.agentdatamanager.annotation.InEnum;
 import com.alibaba.cloud.ai.agentdatamanager.enums.ModelType;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,48 +15,44 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ModelConfigDTO {
 
-    private Integer id;
+	private Integer id;
 
-    @NotBlank(message = "provider must not be empty")
-    private String provider;
+	@NotBlank(message = "provider must not be empty")
+	private String provider; // e.g. "openai", "deepseek"
 
-    private String apiKey;
+	private String apiKey; // e.g. "https://api.openai.com"
 
-    @NotBlank(message = "baseUrl must not be empty")
-    private String baseUrl;
+	@NotBlank(message = "baseUrl must not be empty")
+	private String baseUrl;
 
-    @NotBlank(message = "modelName must not be empty")
-    private String modelName;
+	@NotBlank(message = "modelName must not be empty")
+	private String modelName;
 
-    @NotNull(message = "modelType must not be empty")
-    private ModelType modelType;
+	@NotBlank(message = "modelType must not be empty")
+	@InEnum(value = ModelType.class, message = "CHAT/EMBEDDING 之一")
+	private String modelType;
 
-    private String completionsPath;
+	// 仅当厂商路径非标准时填写，例如 "/custom/chat"
+	private String completionsPath;
 
-    private String embeddingsPath;
+	// 仅当厂商路径非标准时填写
+	private String embeddingsPath;
 
-    @DecimalMin(value = "0.0", message = "temperature must be >= 0")
-    @DecimalMax(value = "2.0", message = "temperature must be <= 2")
-    @Builder.Default
-    private Double temperature = 0.0;
+	private Double temperature = 0.0;
 
-    @Min(value = 100, message = "maxTokens must be >= 100")
-    @Max(value = 10000, message = "maxTokens must be <= 10000")
-    @Builder.Default
-    private Integer maxTokens = 2000;
+	private Integer maxTokens = 2000;
 
-    @Builder.Default
-    private Boolean isActive = Boolean.FALSE;
+	private Boolean isActive = true;
 
-    @Builder.Default
-    private Boolean proxyEnabled = Boolean.FALSE;
+	// 模型代理配置，默认关闭（使用直连）
+	private Boolean proxyEnabled = false;
 
-    private String proxyHost;
+	private String proxyHost;
 
-    private Integer proxyPort;
+	private Integer proxyPort;
 
-    private String proxyUsername;
+	private String proxyUsername;
 
-    private String proxyPassword;
+	private String proxyPassword;
 
 }

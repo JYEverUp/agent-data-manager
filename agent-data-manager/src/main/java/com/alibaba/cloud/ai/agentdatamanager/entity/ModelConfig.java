@@ -1,6 +1,8 @@
+
 package com.alibaba.cloud.ai.agentdatamanager.entity;
 
 import com.alibaba.cloud.ai.agentdatamanager.enums.ModelType;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -8,42 +10,50 @@ import java.time.LocalDateTime;
 @Data
 public class ModelConfig {
 
-    private Integer id;
+	private Integer id;
 
-    private String provider;
+	// 厂商标识 (方便前端展示回显，实际调用主要靠 baseUrl)
+	private String provider;
 
-    private String baseUrl;
+	// 关键配置
+	private String baseUrl;
 
-    private String apiKey;
+	private String apiKey;
 
-    private String modelName;
+	private String modelName;
 
-    private Double temperature;
+	private Double temperature;
 
-    private Boolean isActive = false;
+	private Boolean isActive = false;
 
-    private Integer maxTokens;
+	private Integer maxTokens;
 
-    private ModelType modelType;
+	// 模型类型
+	// 可选值："CHAT", "EMBEDDING"
+	private ModelType modelType;
 
-    private String completionsPath;
+	private String completionsPath;
 
-    private String embeddingsPath;
+	private String embeddingsPath;
 
-    private LocalDateTime createdTime;
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	private LocalDateTime createdTime;
 
-    private LocalDateTime updatedTime;
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	private LocalDateTime updatedTime;
 
-    private Integer isDeleted;
+	// 0=未删除, 1=已删除
+	private Integer isDeleted;
 
-    private Boolean proxyEnabled;
+	// ai-proxy设置（默认关闭，使用直连）
+	private Boolean proxyEnabled;
 
-    private String proxyHost;
+	private String proxyHost;
 
-    private Integer proxyPort;
+	private Integer proxyPort;
 
-    private String proxyUsername;
+	private String proxyUsername;
 
-    private String proxyPassword;
+	private String proxyPassword;
 
 }
